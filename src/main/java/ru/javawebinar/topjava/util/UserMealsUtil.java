@@ -71,8 +71,8 @@ public class UserMealsUtil {
         List<UserMeal> mealTimeFromTheRange = new ArrayList<>();
         Map<LocalDate, Integer> calorieCounterPerDay = meals.stream()
                 .peek(userMeal -> {
-                    LocalTime localTime = userMeal.getDateTime().toLocalTime();
-                    if (TimeUtil.isBetweenHalfOpen(localTime, startTime, endTime)) {
+                    LocalTime mealTime = userMeal.getDateTime().toLocalTime();
+                    if (TimeUtil.isBetweenHalfOpen(mealTime, startTime, endTime)) {
                         mealTimeFromTheRange.add(userMeal);
                     }
                 })
