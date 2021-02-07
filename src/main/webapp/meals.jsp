@@ -19,17 +19,9 @@
     <jsp:useBean id="mealsTo" scope="request" type="java.util.List"/>
     <c:forEach items="${mealsTo}" var="mealTo">
         <jsp:useBean id="mealTo" type="ru.javawebinar.topjava.model.MealTo"/>
-        <c:choose>
-            <c:when test="${mealTo.excess == true}">
-                <c:set var="color" value="color:#ff0000"/>
-            </c:when>
-            <c:otherwise>
-                <c:set var="color" value="color:#008000"/>
-            </c:otherwise>
-        </c:choose>
-        <fmt:parseDate value="${mealTo.dateTime}" pattern="yyyy-MM-dd'T'HH:mm" var="parsedDateTime" type="both"/>
-        <tr style=${color}>
-            <td><fmt:formatDate pattern="dd.MM.yyyy HH:mm" value="${parsedDateTime}"/></td>
+        <tr style="${mealTo.excess == true ? 'color:#ff0000' : 'color:#008000'}">
+            <fmt:parseDate value="${mealTo.dateTime}" pattern="yyyy-MM-dd'T'HH:mm" var="parsedDateTime" type="both"/>
+            <td><fmt:formatDate pattern="dd-MM-yyyy HH:mm" value="${parsedDateTime}"/></td>
             <td>${mealTo.description}</td>
             <td>${mealTo.calories}</td>
         </tr>

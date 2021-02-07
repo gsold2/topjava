@@ -9,18 +9,19 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalTime;
 import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class MealServlet extends HttpServlet {
-    private static final Logger log = getLogger(UserServlet.class);
+    private static final Logger log = getLogger(MealServlet.class);
+    public static final int CALORIES_PER_DAY = 2000;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        log.debug("redirect to meals");
-        int caloriesPerDay = 2000;
-        List<MealTo> mealsTo = MealsUtil.mealListToMealToList(MealsUtil.getMeals(), caloriesPerDay);
+        log.debug("request to meals");
+        List<MealTo> mealsTo = MealsUtil.filteredByStreams(MealsUtil.getMeals(), LocalTime.MIN, LocalTime.MAX, CALORIES_PER_DAY);
         request.setAttribute("mealsTo", mealsTo);
         request.getRequestDispatcher("/meals.jsp").forward(request, response);
     }
