@@ -15,7 +15,10 @@
         <th>Date</th>
         <th>Description</th>
         <th>Calories</th>
+        <th>Update</th>
+        <th>Delete</th>
     </tr>
+    <a href="addmeal.jsp">Add Meal</a>
     <jsp:useBean id="mealsTo" scope="request" type="java.util.List"/>
     <c:forEach items="${mealsTo}" var="mealTo">
         <jsp:useBean id="mealTo" type="ru.javawebinar.topjava.model.MealTo"/>
@@ -24,6 +27,10 @@
             <td><fmt:formatDate pattern="dd-MM-yyyy HH:mm" value="${parsedDateTime}"/></td>
             <td>${mealTo.description}</td>
             <td>${mealTo.calories}</td>
+            <td>
+                <a href="updatemeal.jsp?id=${mealTo.id}&dateTime=${mealTo.dateTime}&description=${mealTo.description}&calories=${mealTo.calories}">Update</a>
+            </td>
+            <td><a href="meals?action=delete&id=<c:out value="${mealTo.id}"/>">Delete</a></td>
         </tr>
     </c:forEach>
 </table>
