@@ -27,9 +27,7 @@
             <td><fmt:formatDate pattern="dd-MM-yyyy HH:mm" value="${parsedDateTime}"/></td>
             <td>${mealTo.description}</td>
             <td>${mealTo.calories}</td>
-            <td>
-                <a href="updatemeal.jsp?id=${mealTo.id}&dateTime=${mealTo.dateTime}&description=${mealTo.description}&calories=${mealTo.calories}">Update</a>
-            </td>
+            <td><a href="meals?action=update&id=${mealTo.id}">Update</a></td>
             <td><a href="meals?action=delete&id=<c:out value="${mealTo.id}"/>">Delete</a></td>
         </tr>
     </c:forEach>
