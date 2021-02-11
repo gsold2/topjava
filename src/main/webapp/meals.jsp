@@ -18,7 +18,7 @@
         <th>Update</th>
         <th>Delete</th>
     </tr>
-    <a href="addmeal.jsp">Add Meal</a>
+    <a href="meals?action=create">Add Meal</a>
     <jsp:useBean id="mealsTo" scope="request" type="java.util.List"/>
     <c:forEach items="${mealsTo}" var="mealTo">
         <jsp:useBean id="mealTo" type="ru.javawebinar.topjava.model.MealTo"/>

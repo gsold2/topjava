@@ -8,12 +8,14 @@
 <hr>
 <h2>Update meal</h2>
 <form method="post" action="meals" enctype="application/x-www-form-urlencoded">
-    <input type="hidden" name="id" value=${requestScope.id}>
     <input type="hidden" name="action" value="update"/>
+    <jsp:useBean id="meal" type="ru.javawebinar.topjava.model.Meal"/>
+    <input type="hidden" name="meal" value=${requestScope.meal}>
+    <input type="hidden" name="id" value=${meal.id}>
 
-    <dl> DataTime <input type="datetime-local" name="dateTime" value=${requestScope.dateTime}></dl>
-    <dl> Description <input type="text" name="description" size="55" value=${requestScope.description}></dl>
-    <dl> Calories <input type="number" name="calories" size="55" value=${requestScope.calories}></dl>
+    <dl> DataTime <input type="datetime-local" name="dateTime" value=${meal.dateTime}></dl>
+    <dl> Description <input type="text" name="description" size="55" value=${meal.description}></dl>
+    <dl> Calories <input type="number" name="calories" size="55" value=${meal.calories}></dl>
     <button type="submit">Save</button>
     <button onclick="window.history.go(-1); return false;">Cancel</button>
 </form>
