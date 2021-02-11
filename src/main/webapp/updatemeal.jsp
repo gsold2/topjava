@@ -9,8 +9,7 @@
 <h2>Update meal</h2>
 <form method="post" action="meals" enctype="application/x-www-form-urlencoded">
     <input type="hidden" name="action" value="update"/>
-    <jsp:useBean id="meal" type="ru.javawebinar.topjava.model.Meal"/>
-    <input type="hidden" name="meal" value=${requestScope.meal}>
+    <jsp:useBean id="meal" scope="request" type="ru.javawebinar.topjava.model.Meal"/>
     <input type="hidden" name="id" value=${meal.id}>
 
     <dl> DataTime <input type="datetime-local" name="dateTime" value=${meal.dateTime}></dl>
