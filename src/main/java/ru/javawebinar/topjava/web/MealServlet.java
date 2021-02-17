@@ -18,7 +18,6 @@ import java.util.Objects;
 
 public class MealServlet extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(MealServlet.class);
-    private final int userId = SecurityUtil.authUserId();
 
     private MealRepository repository;
 
@@ -38,13 +37,14 @@ public class MealServlet extends HttpServlet {
                 Integer.parseInt(request.getParameter("calories")));
 
         log.info(meal.isNew() ? "Create {}" : "Update {}", meal);
-        repository.save(userId, meal);
+        repository.save(SecurityUtil.authUserId(), meal);
         response.sendRedirect("meals");
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
+        int userId = SecurityUtil.authUserId();
 
         switch (action == null ? "all" : action) {
             case "delete":

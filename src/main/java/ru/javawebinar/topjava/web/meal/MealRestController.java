@@ -8,7 +8,6 @@ import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
 import ru.javawebinar.topjava.to.MealTo;
 import ru.javawebinar.topjava.util.MealsUtil;
-import ru.javawebinar.topjava.util.exception.NotFoundException;
 import ru.javawebinar.topjava.web.SecurityUtil;
 
 import java.time.LocalDate;
@@ -17,46 +16,67 @@ import java.util.List;
 
 @Controller
 public class MealRestController {
-    protected final Logger log = LoggerFactory.getLogger(getClass());
-    private final int userId = SecurityUtil.authUserId();
-    private final int caloriesPerDay = SecurityUtil.authUserCaloriesPerDay();
+    private static final Logger log = LoggerFactory.getLogger(MealRestController.class);
 
     @Autowired
     private MealService service;
 
-    public Meal create(Meal meal) throws NotFoundException {
+    public Meal create(Meal meal) {
         log.info("create");
-        return service.create(userId, meal);
+        if (!meal.isNew()) {
+            throw new IllegalArgumentException(meal + " must be new (id=null)");
+        }
+        return service.create(SecurityUtil.authUserId(), meal);
     }
 
-    public Meal update(Meal meal) throws NotFoundException {
+    public Meal update(Meal meal) {
         log.info("update");
-        return service.update(userId, meal);
+        if (meal.isNew()) {
+            throw new IllegalArgumentException(meal + " must be exist (id!=null)");
+        }
+        return service.update(SecurityUtil.authUserId(), meal);
     }
 
-    public void delete(int id) throws NotFoundException {
+    public void delete(int id) {
         log.info("delete");
-        service.delete(userId, id);
+        service.delete(SecurityUtil.authUserId(), id);
     }
 
-    public Meal get(int id) throws NotFoundException {
+    public Meal get(int id) {
         log.info("get");
-        return service.get(userId, id);
+        return service.get(SecurityUtil.authUserId(), id);
     }
 
     public List<MealTo> getAll() {
         log.info("getAll");
-        return MealsUtil.getTos(service.getAll(userId), caloriesPerDay);
+        return MealsUtil.getTos(service.getAll(SecurityUtil.authUserId()), SecurityUtil.authUserId());
     }
 
     public List<MealTo> getBetweenDates(LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime) {
         log.info("getBetweenDates");
-        if ((startDate != null & endDate != null) & (startTime != null & endTime != null)) {
-            List<Meal> list = service.getBetweenDates(userId, startDate, endDate);
-            return MealsUtil.getFilteredTos(list, caloriesPerDay, startTime, endTime);
-        } else if ((startDate != null & endDate != null) & (startTime == null & endTime == null)) {
-            return MealsUtil.getTos(service.getBetweenDates(userId, startDate, endDate), caloriesPerDay);
+        int userId = SecurityUtil.authUserId();
+        int caloriesPerDay = SecurityUtil.authUserCaloriesPerDay();
+        List<Meal> list = service.getBetweenDates(userId, changeLocalDateIfNull(startDate, "min"), changeLocalDateIfNull(endDate, "max"));
+        return MealsUtil.getFilteredTos(list, caloriesPerDay, changeLocalTimeIfNull(startTime, "min"), changeLocalTimeIfNull(endTime, "max"));
+    }
+
+    private LocalDate changeLocalDateIfNull(LocalDate date, String extremeValue) {
+        switch (extremeValue) {
+            case "max":
+                return date == null ? LocalDate.MAX : date;
+            case "min":
+                return date == null ? LocalDate.MIN : date;
         }
-        return getAll();
+        return date;
+    }
+
+    private LocalTime changeLocalTimeIfNull(LocalTime time, String extremeValue) {
+        switch (extremeValue) {
+            case "max":
+                return time == null ? LocalTime.MAX : time;
+            case "min":
+                return time == null ? LocalTime.MIN : time;
+        }
+        return time;
     }
 }
