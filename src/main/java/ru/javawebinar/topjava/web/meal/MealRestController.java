@@ -14,6 +14,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+import static ru.javawebinar.topjava.util.ValidationUtil.assureIdConsistent;
+import static ru.javawebinar.topjava.util.ValidationUtil.checkNew;
+
 @Controller
 public class MealRestController {
     private static final Logger log = LoggerFactory.getLogger(MealRestController.class);
@@ -23,17 +26,13 @@ public class MealRestController {
 
     public Meal create(Meal meal) {
         log.info("create");
-        if (!meal.isNew()) {
-            throw new IllegalArgumentException(meal + " must be new (id=null)");
-        }
+        checkNew(meal);
         return service.create(SecurityUtil.authUserId(), meal);
     }
 
-    public Meal update(Meal meal) {
+    public Meal update(Meal meal, int id) {
         log.info("update");
-        if (meal.isNew()) {
-            throw new IllegalArgumentException(meal + " must be exist (id!=null)");
-        }
+        assureIdConsistent(meal, id);
         return service.update(SecurityUtil.authUserId(), meal);
     }
 
@@ -49,34 +48,14 @@ public class MealRestController {
 
     public List<MealTo> getAll() {
         log.info("getAll");
-        return MealsUtil.getTos(service.getAll(SecurityUtil.authUserId()), SecurityUtil.authUserId());
+        return MealsUtil.getTos(service.getAll(SecurityUtil.authUserId()), SecurityUtil.authUserCaloriesPerDay());
     }
 
-    public List<MealTo> getBetweenDates(LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime) {
+    public List<MealTo> getBetweenDatesOrDefault(LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime) {
         log.info("getBetweenDates");
         int userId = SecurityUtil.authUserId();
         int caloriesPerDay = SecurityUtil.authUserCaloriesPerDay();
-        List<Meal> list = service.getBetweenDates(userId, changeLocalDateIfNull(startDate, "min"), changeLocalDateIfNull(endDate, "max"));
-        return MealsUtil.getFilteredTos(list, caloriesPerDay, changeLocalTimeIfNull(startTime, "min"), changeLocalTimeIfNull(endTime, "max"));
-    }
-
-    private LocalDate changeLocalDateIfNull(LocalDate date, String extremeValue) {
-        switch (extremeValue) {
-            case "max":
-                return date == null ? LocalDate.MAX : date;
-            case "min":
-                return date == null ? LocalDate.MIN : date;
-        }
-        return date;
-    }
-
-    private LocalTime changeLocalTimeIfNull(LocalTime time, String extremeValue) {
-        switch (extremeValue) {
-            case "max":
-                return time == null ? LocalTime.MAX : time;
-            case "min":
-                return time == null ? LocalTime.MIN : time;
-        }
-        return time;
+        List<Meal> list = service.getBetweenDates(userId, (startDate == null ? LocalDate.MIN : startDate), (endDate == null ? LocalDate.MAX : endDate));
+        return MealsUtil.getFilteredTos(list, caloriesPerDay, (startTime == null ? LocalTime.MIN : startTime), (endTime == null ? LocalTime.MAX : endTime));
     }
 }
