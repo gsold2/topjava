@@ -29,10 +29,9 @@ CREATE TABLE meals
 (
     id          SERIAL PRIMARY KEY,
     user_id     INTEGER   NOT NULL,
-    dateTime    TIMESTAMP NOT NULL,
+    datetime    TIMESTAMP NOT NULL,
     description VARCHAR   NOT NULL,
     calories    INTEGER   NOT NULL,
-    CONSTRAINT meals_idx UNIQUE (user_id, dateTime),
+    CONSTRAINT meals_idx UNIQUE (user_id, datetime),
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
-CREATE INDEX meals_user_id_idx ON meals (user_id);
