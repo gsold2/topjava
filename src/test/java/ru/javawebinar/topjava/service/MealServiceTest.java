@@ -9,21 +9,20 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.junit4.SpringRunner;
 import ru.javawebinar.topjava.MealTestData;
-import ru.javawebinar.topjava.UserTestData;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Month;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 import static ru.javawebinar.topjava.MealTestData.*;
+import static ru.javawebinar.topjava.UserTestData.ADMIN_ID;
 import static ru.javawebinar.topjava.UserTestData.USER_ID;
 
 @ContextConfiguration({
-        "classpath:spring/spring-app.xml",
+        "classpath:spring/spring-app-jdbs.xml",
         "classpath:spring/spring-db.xml"
 })
 @RunWith(SpringRunner.class)
@@ -38,12 +37,12 @@ public class MealServiceTest {
     public void update() {
         Meal updated = MealTestData.getUpdated();
         service.update(updated, USER_ID);
-        assertThat(service.get(MEAL_ID, USER_ID)).usingRecursiveComparison().isEqualTo(MealTestData.getUpdated());
+        assertMatch(service.get(mealId, USER_ID), MealTestData.getUpdated());
     }
 
     @Test
-    public void updateNotFoundUserId() {
-        assertThrows(NotFoundException.class, () -> service.update(MealTestData.getUpdated(), UserTestData.ADMIN_ID));
+    public void updateAlienMeal() {
+        assertThrows(NotFoundException.class, () -> service.update(MealTestData.getUpdated(), ADMIN_ID));
     }
 
     @Test
@@ -52,39 +51,39 @@ public class MealServiceTest {
         Integer newId = created.getId();
         Meal newMeal = MealTestData.getNew();
         newMeal.setId(newId);
-        assertThat(created).usingRecursiveComparison().isEqualTo(newMeal);
-        assertThat(service.get(newId, USER_ID)).usingRecursiveComparison().isEqualTo(newMeal);
+        assertMatch(created, newMeal);
+        assertMatch(service.get(newId, USER_ID), newMeal);
     }
 
     @Test
     public void duplicateDateTimeCreate() {
-        assertThrows(DuplicateKeyException.class, () -> service.create(new Meal(LocalDateTime.of(2015, Month.JANUARY, 19, 13, 23, 54), "DuplicateDateTime", 1000), USER_ID));
+        assertThrows(DuplicateKeyException.class, () -> service.create(new Meal(meal_user_1_2.getDateTime(), "DuplicateDateTime", 1000), USER_ID));
     }
 
     @Test
     public void delete() {
-        service.delete(MEAL_ID, USER_ID);
-        assertThrows(NotFoundException.class, () -> service.get(MEAL_ID, USER_ID));
+        service.delete(mealId, USER_ID);
+        assertThrows(NotFoundException.class, () -> service.get(mealId, USER_ID));
     }
 
     @Test
-    public void deletedNotFoundMealId() {
-        assertThrows(NotFoundException.class, () -> service.delete(SOMEONE_ELSE_MEAL_ID, USER_ID));
+    public void deletedNotExistMealId() {
+        assertThrows(NotFoundException.class, () -> service.delete(NOT_EXIST_MEAL_ID, USER_ID));
     }
 
     @Test
     public void get() {
-        assertThat(service.get(MEAL_ID, USER_ID)).usingRecursiveComparison().isEqualTo(meal);
+        assertMatch(service.get(mealId, USER_ID), meal_user_1_1);
     }
 
     @Test
-    public void getNotFoundMealId() {
-        assertThrows(NotFoundException.class, () -> service.get(SOMEONE_ELSE_MEAL_ID, USER_ID));
+    public void getNotExistMealId() {
+        assertThrows(NotFoundException.class, () -> service.get(NOT_EXIST_MEAL_ID, USER_ID));
     }
 
     @Test
     public void getAll() {
-        assertThat(service.getAll(USER_ID)).usingRecursiveComparison().isEqualTo(MealTestData.mealList());
+        assertMatch(service.getAll(USER_ID), MealTestData.mealList());
     }
 
     @Test
@@ -92,5 +91,10 @@ public class MealServiceTest {
         LocalDate startDate = LocalDate.of(2015, Month.JANUARY, 19);
         LocalDate endDate = LocalDate.of(2015, Month.JANUARY, 19);
         assertThat(service.getBetweenInclusive(startDate, endDate, USER_ID)).usingRecursiveComparison().isEqualTo(MealTestData.mealBetweenInclusiveList());
+    }
+
+    @Test
+    public void getBetweenNull() {
+        assertThat(service.getBetweenInclusive(null, null, USER_ID)).usingRecursiveComparison().isEqualTo(MealTestData.mealList());
     }
 }
