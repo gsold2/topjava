@@ -23,7 +23,8 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 
 @ContextConfiguration({
         "classpath:spring/spring-app-jdbs.xml",
-        "classpath:spring/spring-db.xml"
+        "classpath:spring/spring-db.xml",
+        "classpath:spring/spring-app-common.xml"
 })
 @RunWith(SpringRunner.class)
 @Sql(scripts = "classpath:db/initDB.sql", config = @SqlConfig(encoding = "UTF-8"))
@@ -37,7 +38,7 @@ public class MealServiceTest {
     public void update() {
         Meal updated = MealTestData.getUpdated();
         service.update(updated, USER_ID);
-        assertMatch(service.get(mealId, USER_ID), MealTestData.getUpdated());
+        assertMatch(service.get(MEAL_ID, USER_ID), MealTestData.getUpdated());
     }
 
     @Test
@@ -57,13 +58,13 @@ public class MealServiceTest {
 
     @Test
     public void duplicateDateTimeCreate() {
-        assertThrows(DuplicateKeyException.class, () -> service.create(new Meal(meal_user_1_2.getDateTime(), "DuplicateDateTime", 1000), USER_ID));
+        assertThrows(DuplicateKeyException.class, () -> service.create(new Meal(mealUser12.getDateTime(), "DuplicateDateTime", 1000), USER_ID));
     }
 
     @Test
     public void delete() {
-        service.delete(mealId, USER_ID);
-        assertThrows(NotFoundException.class, () -> service.get(mealId, USER_ID));
+        service.delete(MEAL_ID, USER_ID);
+        assertThrows(NotFoundException.class, () -> service.get(MEAL_ID, USER_ID));
     }
 
     @Test
@@ -72,8 +73,14 @@ public class MealServiceTest {
     }
 
     @Test
+    public void deleteAlienMealId() {
+        service.delete(MEAL_ID, USER_ID);
+        assertThrows(NotFoundException.class, () -> service.get(MEAL_ID, ADMIN_ID));
+    }
+
+    @Test
     public void get() {
-        assertMatch(service.get(mealId, USER_ID), meal_user_1_1);
+        assertMatch(service.get(MEAL_ID, USER_ID), mealUser11);
     }
 
     @Test
@@ -82,19 +89,24 @@ public class MealServiceTest {
     }
 
     @Test
+    public void getAlienMealId() {
+        assertThrows(NotFoundException.class, () -> service.get(MEAL_ID, ADMIN_ID));
+    }
+
+    @Test
     public void getAll() {
-        assertMatch(service.getAll(USER_ID), MealTestData.mealList());
+        assertMatch(service.getAll(USER_ID), mealList);
     }
 
     @Test
     public void getBetweenInclusive() {
         LocalDate startDate = LocalDate.of(2015, Month.JANUARY, 19);
         LocalDate endDate = LocalDate.of(2015, Month.JANUARY, 19);
-        assertThat(service.getBetweenInclusive(startDate, endDate, USER_ID)).usingRecursiveComparison().isEqualTo(MealTestData.mealBetweenInclusiveList());
+        assertMatch(service.getBetweenInclusive(startDate, endDate, USER_ID), mealBetweenInclusiveList);
     }
 
     @Test
     public void getBetweenNull() {
-        assertThat(service.getBetweenInclusive(null, null, USER_ID)).usingRecursiveComparison().isEqualTo(MealTestData.mealList());
+        assertThat(service.getBetweenInclusive(null, null, USER_ID)).usingRecursiveComparison().isEqualTo(mealList);
     }
 }
