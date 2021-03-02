@@ -11,7 +11,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.junit4.SpringRunner;
-import ru.javawebinar.topjava.StopWatchUtil;
+import ru.javawebinar.topjava.TimeOfTestsExecutionUtil;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
@@ -34,19 +34,22 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
 public class MealServiceTest {
 
-    private static final List<String> record = new ArrayList<>();
+    @Autowired
+    private MealService service;
+
+    private static final List<String> records = new ArrayList<>();
     private static final Logger log = getLogger(MealServiceTest.class);
 
     @Rule
-    public StopWatchUtil stopwatch = new StopWatchUtil(log, record);
+    public TimeOfTestsExecutionUtil stopwatch = new TimeOfTestsExecutionUtil(records);
 
     @AfterClass
-    public static void afterClass() {
-        record.forEach(System.out::println);
+    public static void outputTimeOfTestsExecution() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n");
+        records.forEach(sb::append);
+        log.info(sb.toString());
     }
-
-    @Autowired
-    private MealService service;
 
     @Test
     public void delete() {
