@@ -3,8 +3,10 @@ package ru.javawebinar.topjava.service;
 import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.test.context.ContextConfiguration;
@@ -21,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertThrows;
-import static org.slf4j.LoggerFactory.getLogger;
 import static ru.javawebinar.topjava.MealTestData.*;
 import static ru.javawebinar.topjava.UserTestData.ADMIN_ID;
 import static ru.javawebinar.topjava.UserTestData.USER_ID;
@@ -34,14 +35,14 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
 public class MealServiceTest {
 
-    @Autowired
-    private MealService service;
-
     private static final List<String> records = new ArrayList<>();
-    private static final Logger log = getLogger(MealServiceTest.class);
+    private static final Logger log = LoggerFactory.getLogger(MealServiceTest.class);
 
     @Rule
-    public TimeOfTestsExecutionUtil stopwatch = new TimeOfTestsExecutionUtil(records);
+    public TestRule stopwatch = new TimeOfTestsExecutionUtil(records, log);
+
+    @Autowired
+    private MealService service;
 
     @AfterClass
     public static void outputTimeOfTestsExecution() {
