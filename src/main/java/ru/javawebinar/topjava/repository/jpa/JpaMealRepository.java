@@ -3,8 +3,8 @@ package ru.javawebinar.topjava.repository.jpa;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.MealRepository;
+import ru.javawebinar.topjava.util.JpaMealRepositoryUtil;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -21,14 +21,7 @@ public class JpaMealRepository implements MealRepository {
     @Override
     @Transactional
     public Meal save(Meal meal, int userId) {
-        meal.setUser(em.getReference(User.class, userId));
-        if (meal.isNew()) {
-            em.persist(meal);
-            return meal;
-        } else if (get(meal.id(), userId) == null) {
-            return null;
-        }
-        return em.merge(meal);
+        return JpaMealRepositoryUtil.getMeal(meal, userId, em, this::get);
     }
 
     @Override
